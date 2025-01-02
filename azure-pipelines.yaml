@@ -1,0 +1,52 @@
+trigger:
+- main
+
+variables:
+  imageName: hello-world-app
+  imageTag: latest
+  kubernetesNamespace: default
+  containerRegistry: k8sdemoacr.azurecr.io
+
+stages:
+- stage: BuildAndPush
+  displayName: "Build and Push Docker Image"
+  jobs:
+  - job: Build
+    displayName: "Build and Push Docker Image"
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - task: DockerInstaller@0
+      displayName: Install Docker
+
+    - task: Docker@2
+      displayName: Build and Push Image
+      inputs:
+        containerRegistry: 'k8sdemoacr serv conn'
+        repository: '$(imageName)'
+        command: 'buildAndPush'
+        Dockerfile: 'Dockerfile'
+        tags: '$(imageTag)'
+
+- stage: Deploy
+  displayName: "Deploy to Kubernetes"
+  dependsOn: BuildAndPush
+  jobs:
+  - job: Deploy
+    displayName: "Deploy to Kubernetes Cluster"
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - task: Kubernetes@1
+      displayName: Apply Deployment Manifests
+      inputs:
+        connectionType: 'Kubernetes Service Connection'
+        kubernetesServiceEndpoint: 'k8s-demo-serv-cnn'
+        namespace: '$(kubernetesNamespace)'
+        command: 'apply'
+        arguments: '-f deployment.yaml -f service.yaml'
+        secretType: 'dockerRegistry'
+        containerRegistryType: 'Azure Container Registry'
+        azureSubscriptionEndpointForSecrets: 'main-rg-siara-serv-cnn'
+        azureContainerRegistry: 'k8sdemoacr.azurecr.io'
+        secretName: 'acr-secret'
