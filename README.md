@@ -1,20 +1,72 @@
-# Introduction 
-TODO: Give a short introduction of your project. Let this section explain the objectives or the motivation behind this project. 
+#Hello World Python Application with Docker and AKS
 
-# Getting Started
-TODO: Guide users through getting your code up and running on their own system. In this section you can talk about:
-1.	Installation process
-2.	Software dependencies
-3.	Latest releases
-4.	API references
+This project demonstrates how to build, containerize, and deploy a simple "Hello! ATS company" Python Flask application to Azure Kubernetes Service (AKS) using Docker and Azure DevOps.
 
-# Build and Test
-TODO: Describe and show how to build your code and run the tests. 
+Prerequisites
 
-# Contribute
-TODO: Explain how other users and developers can contribute to make your code better. 
+Before you begin, make sure you have the following:
 
-If you want to learn more about creating good readme files then refer the following [guidelines](https://docs.microsoft.com/en-us/azure/devops/repos/git/create-a-readme?view=azure-devops). You can also seek inspiration from the below readme files:
-- [ASP.NET Core](https://github.com/aspnet/Home)
-- [Visual Studio Code](https://github.com/Microsoft/vscode)
-- [Chakra Core](https://github.com/Microsoft/ChakraCore)
+- Docker (https://www.docker.com/get-started)
+- Azure CLI (https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)
+- Kubectl (https://kubernetes.io/docs/tasks/tools/install-kubectl/)
+- Azure DevOps Account (https://azure.microsoft.com/en-us/services/devops/)
+- Azure Container Registry (ACR) (https://azure.microsoft.com/en-us/services/container-registry/)
+- An existing AKS cluster
+
+Project Structure
+
+The project contains the following files:
+
+- app.py: Flask application serving a simple HTML page with a "Hello World" message.
+- Dockerfile: Docker configuration for containerizing the application.
+- deployment.yaml: Kubernetes deployment manifest for deploying the application to AKS.
+- service.yaml: Kubernetes service manifest for exposing the application.
+- azure-pipelines.yaml: Azure DevOps pipeline configuration for building, pushing, and deploying the application.
+
+Steps
+
+1. Build and Push Docker Image
+
+Build the Docker Image:
+
+docker build -t <your-acr-name>/hello-world-app:latest .
+
+Push the Docker Image to Azure Container Registry (ACR):
+
+docker push <your-acr-name>/hello-world-app:latest
+
+
+2. Set Up Azure DevOps Pipeline
+
+The pipeline is configured in azure-pipelines.yaml and automatically triggers on changes to the main branch. It performs the following tasks:
+
+1. Build and Push Docker Image: Builds the Docker image and pushes it to ACR.
+2. Deploy to AKS: Deploys the application to AKS using the Kubernetes manifests (deployment.yaml and service.yaml).
+
+3. Apply Kubernetes Manifests
+
+Once the image is built and pushed, deploy the application to AKS using the Kubernetes manifests.
+
+Apply the Deployment:
+
+kubectl apply -f deployment.yaml
+
+Apply the Service:
+
+kubectl apply -f service.yaml
+
+4. Access the Application
+
+After deploying the service, retrieve the external IP of the LoadBalancer:
+
+kubectl get services hello-world-service
+
+Once the external IP is available, navigate to the IP in your browser to see the "Hello World" page.
+
+5. Cleanup Resources
+
+To remove the deployed resources:
+
+kubectl delete -f service.yaml
+kubectl delete -f deployment.yaml
+
